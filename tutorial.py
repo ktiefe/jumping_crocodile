@@ -56,7 +56,7 @@ def get_block(size):
 class Player(pygame.sprite.Sprite):
     COLOR = (255, 0, 0)
     GRAVITY = 1
-    SPRITES = load_sprite_sheets("MainCharacters", "PinkMan", 32, 32, True)
+    SPRITES = load_sprite_sheets("MainCharacters", "NinjaFrog", 32, 32, True)
     ANIMATION_DELAY = 3
 
     def __init__(self, x, y, width, height):
@@ -284,12 +284,24 @@ def main(window):
     block_size = 96
 
     player = Player(100, 100, 50, 50)
-    fire = Fire(100, HEIGHT - block_size - 64, 16, 32)
-    fire.on()
+    fires = [Fire(block_size * 2 + 32, HEIGHT - block_size * 4 -64, 16, 32),
+             Fire(block_size*-2 + 32, HEIGHT - block_size * 4 -64, 16, 32),
+             Fire(block_size * 5 + 32, HEIGHT - block_size * 5 -64, 16, 32)]
+
+    for fire in fires:  
+        fire.on()
+
     floor = [Block(i * block_size, HEIGHT - block_size, block_size)
              for i in range(-WIDTH // block_size, (WIDTH * 2) // block_size)]
     objects = [*floor, Block(0, HEIGHT - block_size * 2, block_size),
-               Block(block_size * 3, HEIGHT - block_size * 4, block_size), fire]
+               Block(block_size * 2, HEIGHT - block_size * 4, block_size),
+               Block(block_size * 5, HEIGHT - block_size * 5, block_size),
+               Block(block_size * 7, HEIGHT - block_size * 6, block_size),
+
+               Block(block_size*-2, HEIGHT - block_size * 4, block_size),
+               Block(block_size*-4, HEIGHT - block_size * 5, block_size),
+               Block(block_size*-6, HEIGHT - block_size * 6, block_size),
+               ] + fires
 
     offset_x = 0
     scroll_area_width = 200
@@ -308,7 +320,9 @@ def main(window):
                     player.jump()
 
         player.loop(FPS)
-        fire.loop()
+
+        for fire in fires:
+            fire.loop()
         handle_move(player, objects)
         draw(window, background, bg_image, player, objects, offset_x)
 
