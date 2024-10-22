@@ -53,8 +53,8 @@ def get_block(size):
     return pygame.transform.scale2x(surface)
 
 
-class Player(pygame.sprite.Sprite):
     COLOR = (255, 0, 0)
+class Player(pygame.sprite.Sprite):
     GRAVITY = 1
     SPRITES = load_sprite_sheets("MainCharacters", "NinjaFrog", 32, 32, True)
     ANIMATION_DELAY = 3
@@ -71,6 +71,9 @@ class Player(pygame.sprite.Sprite):
         self.jump_count = 0
         self.hit = False
         self.hit_count = 0
+
+    def restart(self):
+        pass
 
     def jump(self):
         self.y_vel = -self.GRAVITY * 8
@@ -310,14 +313,27 @@ def main(window):
     while run:
         clock.tick(FPS)
 
-        for event in pygame.event.get():
+        for event in pygame.event.get():   
+
             if event.type == pygame.QUIT:
                 run = False
                 break
 
             if event.type == pygame.KEYDOWN:
+
                 if event.key == pygame.K_SPACE and player.jump_count < 2:
                     player.jump()
+
+                if event.key == pygame.K_r:
+                    player.restart()
+                    print(f"Game restart!!!!")
+                    main(window)
+
+                if event.key == pygame.K_q:
+                    run = False
+                    
+                break 
+
 
         player.loop(FPS)
 
