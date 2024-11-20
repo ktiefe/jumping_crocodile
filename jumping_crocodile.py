@@ -14,9 +14,18 @@ PLAYER_VEL = 5
 
 window = pygame.display.set_mode((WIDTH, HEIGHT))
 
+text_font = pygame.font.SysFont("Arial", 30)
+
+def draw_text(window, x, y, text,):
+    color = [0,0,0]
+    img = text_font.render(text, True, color)
+    window.blit(img, (x, y))
 
 def flip(sprites):
     return [pygame.transform.flip(sprite, True, False) for sprite in sprites]
+
+def game_restart():
+    main(window)
 
 
 def load_sprite_sheets(dir1, dir2, width, height, direction=False):
@@ -71,6 +80,7 @@ class Player(pygame.sprite.Sprite):
         self.jump_count = 0
         self.hit = False
         self.hit_count = 0
+        self.life_level = 5
 
     def restart(self):
         pass
@@ -110,6 +120,10 @@ class Player(pygame.sprite.Sprite):
         if self.hit_count > fps * 2:
             self.hit = False
             self.hit_count = 0
+            self.life_level = self.life_level - 1
+
+        if self.life_level == 0:
+            game_restart()
 
         self.fall_count += 1
         self.update_sprite()
@@ -151,6 +165,23 @@ class Player(pygame.sprite.Sprite):
 
     def draw(self, win, offset_x):
         win.blit(self.sprite, (self.rect.x - offset_x, self.rect.y))
+        draw_text(win, 120, 120, f"Life: {self.life_level}")
+
+
+class Text():
+    def __init__(self, x, y, pre_text: str, size: int):
+        self.pre_text: str = pre_text
+        self.size: int = size
+        self.x = x
+        self.y = y
+
+    def set_text(self, text: str) -> None:
+        self.text = text
+
+    def draw(self, win) -> None:
+        color = [0, 0, 0]
+        img = text_font.render(self.pre_text + self.text, True, color)
+        win.blit(img, (self.x, self.y))
 
 
 class Object(pygame.sprite.Sprite):
@@ -174,14 +205,28 @@ class Block(Object):
         self.mask = pygame.mask.from_surface(self.image)
 
 
+class Fruit(Object):
+    ANIMATION_DELAY = 3
+    def __init__(self, x, y, width, height):
+        super().__init__(x, y, width=width, height=height)
+        self.fruit = load_sprite_sheets("Fruits", width=width, height=height)
+        self.image = self.fruit[0]
+        self.mask = pygame.mask.from_surface(self.image)
+        self.animation_count = 0
+
+    def loop(self):
+        pass
+
 class Fire(Object):
     ANIMATION_DELAY = 3
 
     def __init__(self, x, y, width, height):
         super().__init__(x, y, width, height, "fire")
         self.fire = load_sprite_sheets("Traps", "Fire", width, height)
+        # init image, name off, start form the 0 frame
         self.image = self.fire["off"][0]
-        self.mask = pygame.mask.from_surface(self.image)
+        self.mask = pygame.mask.from_surface(self.image) 
+
         self.animation_count = 0
         self.animation_name = "off"
 
@@ -218,12 +263,15 @@ def get_background(name):
     return tiles, image
 
 
-def draw(window, background, bg_image, player, objects, offset_x):
+def draw(window, background, bg_image, player, objects, texts, offset_x):
     for tile in background:
         window.blit(bg_image, tile)
 
     for obj in objects:
         obj.draw(window, offset_x)
+
+    for text in texts:
+        text.draw(window)
 
     player.draw(window, offset_x)
 
@@ -282,7 +330,7 @@ def handle_move(player, objects):
 
 def main(window):
     clock = pygame.time.Clock()
-    background, bg_image = get_background("Blue.png")
+    background, bg_image = get_background("Green.png")
 
     block_size = 96
 
@@ -293,6 +341,8 @@ def main(window):
 
     for fire in fires:  
         fire.on()
+
+    debug_text = [Text(240, 120, f"Mouse coordinates: ", size=10)]
 
     floor = [Block(i * block_size, HEIGHT - block_size, block_size)
              for i in range(-WIDTH // block_size, (WIDTH * 2) // block_size)]
@@ -327,7 +377,7 @@ def main(window):
                 if event.key == pygame.K_r:
                     player.restart()
                     print(f"Game restart!!!!")
-                    main(window)
+                    game_restart()
 
                 if event.key == pygame.K_q:
                     run = False
@@ -340,7 +390,13 @@ def main(window):
         for fire in fires:
             fire.loop()
         handle_move(player, objects)
-        draw(window, background, bg_image, player, objects, offset_x)
+
+
+        mouse_x, mouse_y = pygame.mouse.get_pos()
+        debug_text[0].set_text(f"{mouse_x, mouse_y}")
+        
+        draw(window, background, bg_image, player, objects, debug_text, offset_x)
+      
 
         if ((player.rect.right - offset_x >= WIDTH - scroll_area_width) and player.x_vel > 0) or (
                 (player.rect.left - offset_x <= scroll_area_width) and player.x_vel < 0):
