@@ -174,13 +174,14 @@ class Text():
         self.size: int = size
         self.x = x
         self.y = y
+        self.text_font = pygame.font.SysFont("Arial", size)
 
     def set_text(self, text: str) -> None:
         self.text = text
 
     def draw(self, win) -> None:
         color = [0, 0, 0]
-        img = text_font.render(self.pre_text + self.text, True, color)
+        img = self.text_font.render(self.pre_text + self.text, True, color)
         win.blit(img, (self.x, self.y))
 
 
@@ -209,13 +210,26 @@ class Fruit(Object):
     ANIMATION_DELAY = 3
     def __init__(self, x, y, width, height):
         super().__init__(x, y, width=width, height=height)
-        self.fruit = load_sprite_sheets("Fruits", width=width, height=height)
-        self.image = self.fruit[0]
+        self.fruits = load_sprite_sheets("Items","Fruits", width=width, height=height)
+        self.image = self.fruits['Apple'][0]
         self.mask = pygame.mask.from_surface(self.image)
+        self.rect = self.image.get_rect(topleft=(self.rect.x, self.rect.y))
         self.animation_count = 0
 
     def loop(self):
+        sprites = self.fruits['Apple']
+        sprite_index = (self.animation_count //
+                        self.ANIMATION_DELAY) % len(sprites)
+        self.image = sprites[sprite_index]
+        self.animation_count += 1
+
+        self.rect = self.image.get_rect(topleft=(self.rect.x, self.rect.y))
+        self.mask = pygame.mask.from_surface(self.image)
+
+        if self.animation_count // self.ANIMATION_DELAY > len(sprites):
+            self.animation_count = 0
         pass
+
 
 class Fire(Object):
     ANIMATION_DELAY = 3
@@ -338,11 +352,13 @@ def main(window):
     fires = [Fire(block_size * 2 + 32, HEIGHT - block_size * 4 -64, 16, 32),
              Fire(block_size*-2 + 32, HEIGHT - block_size * 4 -64, 16, 32),
              Fire(block_size * 5 + 32, HEIGHT - block_size * 5 -64, 16, 32)]
+    
+    fruits = [Fruit(x=715, y=165, width=32, height=32)]
 
     for fire in fires:  
         fire.on()
 
-    debug_text = [Text(240, 120, f"Mouse coordinates: ", size=10)]
+    debug_text = [Text(813, 8, f"Mouse coordinates: ", size=12)]
 
     floor = [Block(i * block_size, HEIGHT - block_size, block_size)
              for i in range(-WIDTH // block_size, (WIDTH * 2) // block_size)]
@@ -354,7 +370,7 @@ def main(window):
                Block(block_size*-2, HEIGHT - block_size * 4, block_size),
                Block(block_size*-4, HEIGHT - block_size * 5, block_size),
                Block(block_size*-6, HEIGHT - block_size * 6, block_size),
-               ] + fires
+               ] + fires + fruits
 
     offset_x = 0
     scroll_area_width = 200
@@ -389,6 +405,11 @@ def main(window):
 
         for fire in fires:
             fire.loop()
+
+
+        for fruit in fruits:
+            fruit.loop()
+        
         handle_move(player, objects)
 
 
