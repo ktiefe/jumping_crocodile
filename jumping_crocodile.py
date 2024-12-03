@@ -4,6 +4,9 @@ import math
 import pygame
 from os import listdir
 from os.path import isfile, join
+
+current_file_directory = os.path.dirname(os.path.abspath(__file__))
+
 pygame.init()
 
 pygame.display.set_caption("Platformer")
@@ -51,6 +54,21 @@ def load_sprite_sheets(dir1, dir2, width, height, direction=False):
             all_sprites[image.replace(".png", "")] = sprites
 
     return all_sprites
+
+def load_sprites(path: str, w, h):
+
+    abs_path = f"{current_file_directory}/{path}"
+    assert os.path.isfile(abs_path), "File doesn't exists,"
+
+    sprite_sheet = pygame.image.load(abs_path).convert_alpha()
+    sprites = []
+    for i in range(sprite_sheet.get_width() // w):
+        surface = pygame.Surface((w, h), pygame.SRCALPHA, 32)
+        rect = pygame.Rect(i * w, 0, w, h)
+        surface.blit(sprite_sheet, (0, 0), rect)
+        sprites.append(pygame.transform.scale2x(surface))
+
+    return sprites
 
 
 def get_block(size):
@@ -210,24 +228,20 @@ class Fruit(Object):
     ANIMATION_DELAY = 3
     def __init__(self, x, y, width, height):
         super().__init__(x, y, width=width, height=height)
-        self.fruits = load_sprite_sheets("Items","Fruits", width=width, height=height)
-        self.image = self.fruits['Apple'][0]
+        self.fruits = load_sprites(r"assets/Items/Fruits/Apple.png", width, height)
+        self.image = self.fruits[0]
         self.mask = pygame.mask.from_surface(self.image)
-        self.rect = self.image.get_rect(topleft=(self.rect.x, self.rect.y))
+        self.rect = self.image.get_rect()
+        self.rect.center = [x, y]
         self.animation_count = 0
+        self.num_sprites = len(self.fruits)
 
     def loop(self):
-        sprites = self.fruits['Apple']
-        sprite_index = (self.animation_count //
-                        self.ANIMATION_DELAY) % len(sprites)
-        self.image = sprites[sprite_index]
-        self.animation_count += 1
-
-        self.rect = self.image.get_rect(topleft=(self.rect.x, self.rect.y))
-        self.mask = pygame.mask.from_surface(self.image)
-
-        if self.animation_count // self.ANIMATION_DELAY > len(sprites):
+        if self.animation_count >= self.num_sprites:
             self.animation_count = 0
+
+        self.image = self.fruits[math.floor(self.animation_count)]
+        self.animation_count += (1/self.ANIMATION_DELAY)
         pass
 
 
@@ -353,7 +367,7 @@ def main(window):
              Fire(block_size*-2 + 32, HEIGHT - block_size * 4 -64, 16, 32),
              Fire(block_size * 5 + 32, HEIGHT - block_size * 5 -64, 16, 32)]
     
-    fruits = [Fruit(x=715, y=165, width=32, height=32)]
+    fruits = [Fruit(x=719, y=190, width=32, height=32)]
 
     for fire in fires:  
         fire.on()
