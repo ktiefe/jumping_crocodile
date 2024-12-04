@@ -1,0 +1,32 @@
+
+# Python cache files
+__pycache__/
+*.py[cod]
+
+# Pygame files
+*.pygame
+
+# Directories for assets
+assets/
+
+# Temporary files
+*.tmp
+*.temp
+
+# Logs
+*.log
+
+# Unit test results
+*.result
+*.coverage
+
+# IDE specific files (if you use an IDE)
+.vscode/
+.idea/
+*.swp
+
+# MacOS specific files
+.DS_Store
+
+# Windows specific files
+Thumbs.db

@@ -426,13 +426,11 @@ def main(window):
         
         handle_move(player, objects)
 
-
         mouse_x, mouse_y = pygame.mouse.get_pos()
         debug_text[0].set_text(f"{mouse_x, mouse_y}")
         
         draw(window, background, bg_image, player, objects, debug_text, offset_x)
       
-
         if ((player.rect.right - offset_x >= WIDTH - scroll_area_width) and player.x_vel > 0) or (
                 (player.rect.left - offset_x <= scroll_area_width) and player.x_vel < 0):
             offset_x += player.x_vel
