@@ -228,7 +228,7 @@ class Fruit(Object):
     ANIMATION_DELAY = 3
     def __init__(self, x, y, width, height):
         super().__init__(x, y, width=width, height=height)
-        self.fruits = load_sprites(r"assets/Items/Fruits/Apple.png", width, height)
+        self.fruits = load_sprites(r"assets/Items/Fruits/Melon.png", width, height)
         self.image = self.fruits[0]
         self.mask = pygame.mask.from_surface(self.image)
         self.rect = self.image.get_rect()
