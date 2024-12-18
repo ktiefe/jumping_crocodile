@@ -11,19 +11,19 @@ class Fruit:
         print("eat")
 
     def is_eaten(self):
-        return True
+        return False
 
 class FruitOrder(StateMachine):
-    "A traffic light machine"
+    "A fruit machine"
     fruit = State(initial=True)
     collect = State()
-    end = State(final=True)
+    deth = State(final=True)
 
-    animate = ( fruit.to.itself() | collect.to.itself() )
-    eat = ( fruit.to(collect) )
-
-
+    animate = (fruit.to.itself() | collect.to.itself())
+    eat = fruit.to(collect)
+    is_eaten = collect.to(deth)
     
+
     def on_enter_idle(self):
         pass
 
