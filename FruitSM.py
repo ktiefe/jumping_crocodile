@@ -2,34 +2,23 @@ from statemachine import StateMachine, State
 
 class Fruit:
     def __init__(self):
+        self.bites = 0
+
+    def on_animate(self):
         pass
 
-    def animate(self):
-        print("animate")
-
-    def eat(self):
-        print("eat")
+    def on_eat(self):
+        self.bites+=1
 
     def is_eaten(self):
-        return False
+        return self.bites == 2
 
-class FruitOrder(StateMachine):
+class FruitControl(StateMachine):
     "A fruit machine"
     fruit = State(initial=True)
-    collect = State()
-    deth = State(final=True)
+    eaten = State()
+    death = State(final=True)
 
-    animate = (fruit.to.itself() | collect.to.itself())
-    eat = fruit.to(collect)
-    is_eaten = collect.to(deth)
-    
-
-    def on_enter_idle(self):
-        pass
-
-    def on_enter_collect(self):
-        pass
-
-    def on_enter_end(self):
-        pass
+    animate = (fruit.to.itself() | eaten.to.itself())
+    eat = ( fruit.to(eaten) | eaten.to.itself(unless="is_eaten") | eaten.to(death) )
 
