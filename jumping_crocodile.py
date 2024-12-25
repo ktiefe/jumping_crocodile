@@ -226,15 +226,29 @@ class Block(Object):
 
 class Fruit(Object):
     ANIMATION_DELAY = 3
-    def __init__(self, x, y, width, height):
-        super().__init__(x, y, width=width, height=height)
-        self.fruits = load_sprites(r"assets/Items/Fruits/Melon.png", width, height)
+    def __init__(self, x, y):
+        self.width = 32
+        self.height = 32
+        self.x = x
+        self.y = y
+        super().__init__(x, y, width=self.width, height=self.height, name="fruit")
+        self._set_image("assets/Items/Fruits/Melon.png", self.width, self.height)
+
+    def _set_image(self, path_name: str, width, height):
+        self.fruits = load_sprites(path_name, width, height)
+
         self.image = self.fruits[0]
         self.mask = pygame.mask.from_surface(self.image)
+
         self.rect = self.image.get_rect()
-        self.rect.center = [x, y]
+        self.rect.center = [self.x, self.y]
+
         self.animation_count = 0
         self.num_sprites = len(self.fruits)
+        pass
+
+    def eat(self):
+        self._set_image("assets/Items/Fruits/Collected.png", self.width, self.height)
 
     def loop(self):
         if self.animation_count >= self.num_sprites:
@@ -242,7 +256,6 @@ class Fruit(Object):
 
         self.image = self.fruits[math.floor(self.animation_count)]
         self.animation_count += (1/self.ANIMATION_DELAY)
-        pass
 
 
 class Fire(Object):
@@ -355,6 +368,9 @@ def handle_move(player, objects):
         if obj and obj.name == "fire":
             player.make_hit()
 
+        if obj and obj.name == "fruit":
+            obj.eat()
+
 
 def main(window):
     clock = pygame.time.Clock()
@@ -367,7 +383,7 @@ def main(window):
              Fire(block_size*-2 + 32, HEIGHT - block_size * 4 -64, 16, 32),
              Fire(block_size * 5 + 32, HEIGHT - block_size * 5 -64, 16, 32)]
     
-    fruits = [Fruit(x=719, y=190, width=32, height=32)]
+    fruits = [Fruit(x=719, y=190)]
 
     for fire in fires:  
         fire.on()
