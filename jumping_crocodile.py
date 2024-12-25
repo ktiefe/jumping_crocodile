@@ -117,6 +117,9 @@ class Player(pygame.sprite.Sprite):
     def make_hit(self):
         self.hit = True
 
+    def add_life(self):
+        self.life_level +=1
+
     def move_left(self, vel):
         self.x_vel = -vel
         if self.direction != "left":
@@ -370,6 +373,7 @@ def handle_move(player, objects):
 
         if obj and obj.name == "fruit":
             obj.eat()
+            player.add_life()
 
 
 def main(window):
@@ -383,7 +387,7 @@ def main(window):
              Fire(block_size*-2 + 32, HEIGHT - block_size * 4 -64, 16, 32),
              Fire(block_size * 5 + 32, HEIGHT - block_size * 5 -64, 16, 32)]
     
-    fruits = [Fruit(x=719, y=190)]
+    fruits = [Fruit(x=719, y=190), Fruit(x=240, y=303), Fruit(x=528, y=195)]
 
     for fire in fires:  
         fire.on()
